@@ -1,6 +1,7 @@
 package com.example.spring6restmvc.controller;
 
 import com.example.spring6restmvc.entities.Beer;
+import com.example.spring6restmvc.mappers.BeerMapper;
 import com.example.spring6restmvc.model.BeerDTO;
 import com.example.spring6restmvc.repositories.BeerRepository;
 import org.junit.jupiter.api.Test;
@@ -25,10 +26,30 @@ class BeerControllerIT {
     @Autowired
     BeerRepository beerRepository;
 
+    @Autowired
+    BeerMapper beerMapper;
+
+    @Test
+    void updateExistingBeer() {
+        Beer beer = beerRepository.findAll().get(0);
+        BeerDTO beerDTO = beerMapper.beerToBeerDto(beer);
+        beerDTO.setId(null);
+        beerDTO.setVersion(null);
+        final String beerName = "UPDATED";
+        beerDTO.setBeerName(beerName);
+
+        ResponseEntity responseEntity = beerController.updateById(beer.getId(), beerDTO);
+
+        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatusCode.valueOf(204));
+        Beer updatedBeer = beerRepository.findById(beer.getId()).get();
+
+        assertThat(updatedBeer.getBeerName()).isEqualTo(beerName);
+    }
+
     @Rollback
     @Transactional
     @Test
-    void saveNewBeerTest(){
+    void saveNewBeerTest() {
         BeerDTO beerDTO = BeerDTO.builder()
                 .beerName("New Beer")
                 .build();
@@ -47,14 +68,14 @@ class BeerControllerIT {
     }
 
     @Test
-    void testBeerIdNotFound(){
-        assertThrows(NotFoundException.class,()->{
-           beerController.getBeerById(UUID.randomUUID());
+    void testBeerIdNotFound() {
+        assertThrows(NotFoundException.class, () -> {
+            beerController.getBeerById(UUID.randomUUID());
         });
     }
 
     @Test
-    void testGetById(){
+    void testGetById() {
         Beer beer = beerRepository.findAll().get(0);
 
         BeerDTO dto = beerController.getBeerById(beer.getId());
