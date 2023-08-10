@@ -22,11 +22,19 @@ repositories {
     maven { url 'https://repo.spring.io/milestone' }
 }
 
+ext {
+    mapstructSpringExtensionsVersion = "1.5.5.Final"
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-web'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
+
+    implementation"org.mapstruct:mapstruct:${mapstructSpringExtensionsVersion}"
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructSpringExtensionsVersion}"
+
 
     runtimeOnly 'com.h2database:h2'
 
