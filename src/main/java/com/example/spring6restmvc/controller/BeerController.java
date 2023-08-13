@@ -23,15 +23,15 @@ public class BeerController {
     private final BeerService beerService;
 
     @PatchMapping(BEER_PATH_ID)
-    public ResponseEntity updateBeerPatchById(@PathVariable("beerId")UUID beerId,@RequestBody BeerDTO beerDto){
+    public ResponseEntity updateBeerPatchById(@PathVariable("beerId") UUID beerId, @RequestBody BeerDTO beerDto) {
         beerService.patchBeerById(beerId, beerDto);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
     @DeleteMapping(BEER_PATH_ID)
-    public ResponseEntity deleteById(@PathVariable("beerId")UUID beerId){
-        if (!beerService.deleteById(beerId)){
+    public ResponseEntity deleteById(@PathVariable("beerId") UUID beerId) {
+        if (!beerService.deleteById(beerId)) {
             throw new NotFoundException();
         }
 
@@ -39,8 +39,8 @@ public class BeerController {
     }
 
     @PutMapping(BEER_PATH_ID)
-    public ResponseEntity updateById(@PathVariable("beerId")UUID beerId,@Validated @RequestBody BeerDTO beerDto){
-        if( beerService.updateBeerById(beerId, beerDto).isEmpty()){
+    public ResponseEntity updateById(@PathVariable("beerId") UUID beerId, @Validated @RequestBody BeerDTO beerDto) {
+        if (beerService.updateBeerById(beerId, beerDto).isEmpty()) {
             throw new NotFoundException();
         }
 
@@ -49,20 +49,22 @@ public class BeerController {
 
     @PostMapping(BEER_PATH)
     //@RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity handlePost(@Validated @RequestBody BeerDTO beerDto){
+    public ResponseEntity handlePost(@Validated @RequestBody BeerDTO beerDto) {
         BeerDTO savedBeerDTO = beerService.saveNewBeer(beerDto);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Location",BEER_PATH + "/" + savedBeerDTO.getId().toString());
+        headers.add("Location", BEER_PATH + "/" + savedBeerDTO.getId().toString());
 
-        return new ResponseEntity(headers,HttpStatus.CREATED);
+        return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
     @GetMapping(value = BEER_PATH)
     public List<BeerDTO> listBeers(@RequestParam(required = false) String beerName,
-                                   @RequestParam(required = false)BeerStyle beerStyle,
-                                   @RequestParam(required = false) Boolean showInventory) {
-        return beerService.listBeers(beerName, beerStyle, showInventory);
+                                   @RequestParam(required = false) BeerStyle beerStyle,
+                                   @RequestParam(required = false) Boolean showInventory,
+                                   @RequestParam(required = false) Integer pageNumber,
+                                   @RequestParam(required = false) Integer pageSize) {
+        return beerService.listBeers(beerName, beerStyle, showInventory, pageNumber, pageSize);
     }
 
 
