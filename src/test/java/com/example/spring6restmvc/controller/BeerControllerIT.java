@@ -58,6 +58,16 @@ class BeerControllerIT {
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
     }
 
+    @Test
+    void testNoAuth() throws Exception {
+        //Test No Auth
+        mockMvc.perform(get(BeerController.BEER_PATH)
+                        .queryParam("beerStyle", BeerStyle.IPA.name())
+                        .queryParam("pageSize", "800"))
+                .andExpect(status().isUnauthorized());
+
+    }
+
     @Disabled // just for demo purposes
     @Test
     void testUpdateBeerBadVersion() throws Exception {
@@ -67,7 +77,7 @@ class BeerControllerIT {
 
         beerDTO.setBeerName("Updated Name");
 
-        MvcResult result = mockMvc.perform(put(BeerController.BEER_PATH_ID, beer.getId()).with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
+        MvcResult result = mockMvc.perform(put(BeerController.BEER_PATH_ID, beer.getId())
                         .contentType(MediaType.APPLICATION_JSON)
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beerDTO)))
@@ -91,7 +101,7 @@ class BeerControllerIT {
 
     @Test
     void tesListBeersByStyleAndNameShowInventoryTruePage2() throws Exception{
-        mockMvc.perform(get(BeerController.BEER_PATH).with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
+        mockMvc.perform(get(BeerController.BEER_PATH)
                 .queryParam("beerName","IPA")
                 .queryParam("beerStyle",BeerStyle.IPA.name())
                 .queryParam("showInventory","true")
