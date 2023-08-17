@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.httpBasic;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.jwt;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -70,7 +72,14 @@ class BeerControllerTest {
 
         beerMap.put("beerName", "New Name");
 
-        mockMvc.perform(patch(BeerController.BEER_PATH_ID, beerDto.getId()).contentType(MediaType.APPLICATION_JSON).with(httpBasic(BeerControllerTest.USERNAME, BeerControllerTest.PASSWORD))
+        mockMvc.perform(patch(BeerController.BEER_PATH_ID, beerDto.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .with(jwt().jwt(jwt->{
+                            jwt.claims(claims -> {
+                                claims.put("scope", "message-read");
+                                claims.put("scope", "message-write");
+                            }).subject("oidc-client")
+                                    .notBefore(Instant.now().minusSeconds(5l));
+                        }))
                         .accept(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(beerMap)))
                 .andExpect(status().isNoContent());
