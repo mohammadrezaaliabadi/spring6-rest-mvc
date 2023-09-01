@@ -34,6 +34,7 @@ public class SpringSecConfig {
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
                                 mvc.pattern("/v3/api-docs**"),
+                                mvc.pattern("/v3/api-docs/**"),
                                 mvc.pattern("/swagger-ui/**"),
                                 mvc.pattern("/swagger-ui.html")
                         ).permitAll()
