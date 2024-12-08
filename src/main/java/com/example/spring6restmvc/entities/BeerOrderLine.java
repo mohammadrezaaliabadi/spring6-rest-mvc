@@ -1,9 +1,14 @@
 package com.example.spring6restmvc.entities;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Min;
 import lombok.*;
-import org.hibernate.annotations.*;
+import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.UuidGenerator;
 import org.hibernate.type.SqlTypes;
+
 import java.sql.Timestamp;
 import java.util.UUID;
 
@@ -15,12 +20,10 @@ import java.util.UUID;
 @Builder
 public class BeerOrderLine {
 
+
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @UuidGenerator
     @JdbcTypeCode(SqlTypes.CHAR)
     @Column(length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false )
     private UUID id;
@@ -44,7 +47,7 @@ public class BeerOrderLine {
 
     @ManyToOne
     private Beer beer;
-
+    @Min(value = 1, message = "Quantity On Hand must be greater than 0")
     private Integer orderQuantity = 0;
     private Integer quantityAllocated = 0;
 }

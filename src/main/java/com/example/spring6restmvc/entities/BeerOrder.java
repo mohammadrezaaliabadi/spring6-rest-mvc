@@ -1,13 +1,15 @@
 package com.example.spring6restmvc.entities;
 
 import jakarta.persistence.*;
-import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UpdateTimestamp;
+import jakarta.persistence.CascadeType;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.hibernate.annotations.*;
 import org.hibernate.type.SqlTypes;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.Set;
 import java.util.UUID;
@@ -18,23 +20,23 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 public class BeerOrder {
+
     public BeerOrder(UUID id, Long version, Timestamp createdDate, Timestamp lastModifiedDate, String customerRef,
-                     Customer customer, Set<BeerOrderLine> beerOrderLines, BeerOrderShipment beerOrderShipment) {
+                     Customer customer, BigDecimal paymentAmount, Set<BeerOrderLine> beerOrderLines, BeerOrderShipment beerOrderShipment) {
         this.id = id;
         this.version = version;
         this.createdDate = createdDate;
         this.lastModifiedDate = lastModifiedDate;
         this.customerRef = customerRef;
         this.setCustomer(customer);
-        this.beerOrderLines = beerOrderLines;
+        this.setPaymentAmount(paymentAmount);
+        this.setBeerOrderLines(beerOrderLines);
         this.setBeerOrderShipment(beerOrderShipment);
     }
+
     @Id
     @GeneratedValue(generator = "UUID")
-    @GenericGenerator(
-            name = "UUID",
-            strategy = "org.hibernate.id.UUIDGenerator"
-    )
+    @UuidGenerator
     @JdbcTypeCode(SqlTypes.CHAR)
     @Column(length = 36, columnDefinition = "varchar(36)", updatable = false, nullable = false )
     private UUID id;
@@ -58,18 +60,32 @@ public class BeerOrder {
     @ManyToOne
     private Customer customer;
 
-    public void setCustomer(Customer customer){
-        this.customer = customer;
-        customer.getBeerOrders().add(this);
+    private BigDecimal paymentAmount;
+
+    public void setCustomer(Customer customer) {
+        if (customer != null) {
+            this.customer = customer;
+            customer.getBeerOrders().add(this);
+        }
+
     }
 
     public void setBeerOrderShipment(BeerOrderShipment beerOrderShipment) {
-        this.beerOrderShipment = beerOrderShipment;
-        beerOrderShipment.setBeerOrder(this);
+        if (beerOrderShipment != null) {
+            this.beerOrderShipment = beerOrderShipment;
+            beerOrderShipment.setBeerOrder(this);
+        }
     }
 
-    @OneToMany(mappedBy = "beerOrder")
+    @OneToMany(mappedBy = "beerOrder", cascade = CascadeType.ALL)
     private Set<BeerOrderLine> beerOrderLines;
+
+    public void setBeerOrderLines(Set<BeerOrderLine> beerOrderLines) {
+        if (beerOrderLines != null) {
+            this.beerOrderLines = beerOrderLines;
+            beerOrderLines.forEach(beerOrderLine -> beerOrderLine.setBeerOrder(this));
+        }
+    }
 
     @OneToOne(cascade = CascadeType.PERSIST)
     private BeerOrderShipment beerOrderShipment;
